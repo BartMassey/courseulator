@@ -3,16 +3,20 @@
 # generating student-emails.txt and "new format" students.csv.
 # Bart Massey 2021
 
-disc = 0.5
-
-import csv, re, sys, warnings
+import argparse, sys, warnings
 from collections import namedtuple
 
 from openpyxl import load_workbook
 
 import tiles
 
-sheet = sys.argv[1]
+ap = argparse.ArgumentParser()
+ap.add_argument("-d", "--disc", type=float, default=0.7)
+ap.add_argument("sheet")
+args = ap.parse_args()
+
+sheet = args.sheet
+disc = args.disc
 
 Record = namedtuple(
     'Record',
