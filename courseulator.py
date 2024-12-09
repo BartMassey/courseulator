@@ -44,13 +44,28 @@ with warnings.catch_warnings(record=True):
     for row in ws.iter_rows(min_row=2, values_only=True):
         term = row[term_header]
         crn = row[crn_header]
+
         status = row[status_header]
         if status == "Cancelled":
             continue
+
         title = row[title_header]
-        instructor_last = row[instructor_last_header]
-        instructor_first = row[instructor_first_header]
-        if not instructor_last or not instructor_first:
+        if not title.startswith("TOP:"):
             continue
-        instructor = instructor_last + ", " + instructor_first
+        title = title[4:].strip()
+
+        instructor_last = row[instructor_last_header]
+        # XXX Weird special case for David Whitlock. Idk.
+        whitlock = " Comp. Sci"
+        if instructor_last and instructor_last.endswith(whitlock):
+            instructor_last = instructor_last[:-len(whitlock)]
+        instructor_first = row[instructor_first_header]
+        if instructor_first and instructor_last:
+            instructor = instructor_last + ", " + instructor_first
+        else:
+            if instructor_last:
+                instructor = instructor_last
+            else:
+                instructor = "[unknown]"
+
         print(term, crn, status, title, instructor)
