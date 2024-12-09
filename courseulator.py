@@ -123,16 +123,19 @@ with open("report.txt", "w") as f:
             r = records[cx]
             print("   ", r.cid, r.title, file=f)
 
-fl = open("latest.csv", "w")
-ff = open("first.csv", "w")
-wl = csv.writer(fl)
-wf = csv.writer(ff)
-
+firsts = []
+latests = []
 for c in clusters:
-    r = records[c[0]]
-    quarter = quarters[r.term - 1]
-    wl.writerow([r.title, r.instructor, r.year, quarter])
+    firsts.append(records[c[0]])
+    latests.append(records[c[-1]])
+latests.sort(key = lambda r: (r.year, r.term), reverse = True)
 
-    r = records[c[-1]]
-    quarter = quarters[r.term - 1]
-    wf.writerow([r.title, r.instructor, r.year, quarter])
+def write_csv(fn, rs):
+    with open(fn, "w") as f:
+        w = csv.writer(f)
+        for r in rs:
+            quarter = quarters[r.term - 1]
+            w.writerow([r.title, r.instructor, r.year, quarter])
+
+write_csv("latest.csv", latests)
+write_csv("first.csv", latests)
