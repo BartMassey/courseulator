@@ -3,9 +3,12 @@
 # generating student-emails.txt and "new format" students.csv.
 # Bart Massey 2021
 
-import csv, datetime, re, sys, warnings
+import csv, re, sys, warnings
+from collections import namedtuple
 
 from openpyxl import load_workbook
+
+# import tiles
 
 name_re = re.compile(
     r"([A-Z][-' A-Za-z]*), ([A-Z][-' A-Za-z]*)( ([A-Z])\.)?( \(([^)]*)\))?",
@@ -42,9 +45,12 @@ with warnings.catch_warnings(record=True):
     instructor_first_header = headers["Instructor_First_Name"]
 
     for row in ws.iter_rows(min_row=2, values_only=True):
-        term = row[term_header]
-        crn = row[crn_header]
+        yearterm = row[term_header]
+        year = int(yearterm[:4])
+        term = int(yearterm[4:])
 
+        crn = row[crn_header]
+        cid = crn + "-" + str(year)
         status = row[status_header]
         if status == "Cancelled":
             continue
@@ -68,4 +74,4 @@ with warnings.catch_warnings(record=True):
             else:
                 instructor = "[unknown]"
 
-        print(term, crn, status, title, instructor)
+        print(year, term, cid, title, instructor)
