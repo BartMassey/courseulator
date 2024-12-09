@@ -1,10 +1,11 @@
 import re, sys
 
 vowel_re = re.compile(r"[AEIOU]")
+split_re = re.compile(r"[^A-Z]")
 
 def tileset(s):
     result = set()
-    for word in s.split():
+    for word in split_re.split(s):
         w = vowel_re.sub("", word)
         if len(w) < 3:
             w = word

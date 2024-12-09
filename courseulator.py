@@ -74,7 +74,7 @@ with warnings.catch_warnings(record=True):
             if instructor_last:
                 instructor = instructor_last
             else:
-                instructor = "[unknown]"
+                instructor = ""
 
         ts = tiles.tileset(title)
 
