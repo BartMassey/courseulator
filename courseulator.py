@@ -3,7 +3,7 @@
 # generating student-emails.txt and "new format" students.csv.
 # Bart Massey 2021
 
-import argparse, sys, warnings
+import argparse, csv, sys, warnings
 from collections import namedtuple
 
 from openpyxl import load_workbook
@@ -22,6 +22,8 @@ Record = namedtuple(
     'Record',
     ['year', 'term', 'cid', 'title', 'instructor', 'tiles'],
 )
+
+quarters = ["Wi", "Sp", "Su", "Fa"]
 
 records = []
 with warnings.catch_warnings(record=True):
@@ -113,10 +115,17 @@ for i, r1 in enumerate(records):
             placed |= {j}
     clusters.append(cur_cluster)
 
-for c in clusters:
-    r0 = records[c[0]]
-    print(r0.cid, r0.title)
-    for cx in c[1:]:
-        r = records[cx]
-        print("    ", r.cid, r.title)
+with open("report.txt", "w") as f:
+    for c in clusters:
+        r0 = records[c[0]]
+        print(r0.cid, r0.title, file=f)
+        for cx in c[1:]:
+            r = records[cx]
+            print("   ", r.cid, r.title, file=f)
 
+with open("leaders.csv", "w") as f:
+    w = csv.writer(f)
+    for c in clusters:
+        r = records[c[0]]
+        quarter = quarters[r.term - 1]
+        w.writerow([r.title, r.instructor, r.year, quarter])
