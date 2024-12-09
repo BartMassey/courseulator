@@ -1,6 +1,13 @@
+import re, sys
+
+vowel_re = re.compile(r"[AEIOU]")
+
 def tileset(s):
     result = set()
-    for w in s.split():
+    for word in s.split():
+        w = vowel_re.sub("", word)
+        if len(w) < 3:
+            w = word
         nw = len(w)
         if nw < 3:
             continue
@@ -9,6 +16,8 @@ def tileset(s):
     return result
 
 def sim(ts1, ts2):
+    if not ts1 and not ts2:
+        return 0
     return len(ts1 & ts2) / len(ts1 | ts2)
 
 if __name__ == "__main__":
