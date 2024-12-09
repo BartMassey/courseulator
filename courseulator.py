@@ -3,27 +3,23 @@
 # generating student-emails.txt and "new format" students.csv.
 # Bart Massey 2021
 
+disc = 0.5
+
 import csv, re, sys, warnings
 from collections import namedtuple
 
 from openpyxl import load_workbook
 
-# import tiles
-
-name_re = re.compile(
-    r"([A-Z][-' A-Za-z]*), ([A-Z][-' A-Za-z]*)( ([A-Z])\.)?( \(([^)]*)\))?",
-)
-
-section_re = re.compile(
-    r"[1-6]\d\d[Pp]?",
-)
-
-withdraw_re = re.compile(
-    r"[Ww]ithdraw",
-)
+import tiles
 
 sheet = sys.argv[1]
 
+Record = namedtuple(
+    'Record',
+    ['year', 'term', 'cid', 'title', 'instructor', 'tiles'],
+)
+
+records = []
 with warnings.catch_warnings(record=True):
     warnings.simplefilter("always")
     wb = load_workbook(filename=sheet)
@@ -74,4 +70,49 @@ with warnings.catch_warnings(record=True):
             else:
                 instructor = "[unknown]"
 
-        print(year, term, cid, title, instructor)
+        ts = tiles.tileset(title)
+
+        r = Record(year, term, cid, title, instructor, ts)
+        records.append(r)
+
+records.sort(key = lambda r: (r.year, r.term), reverse=True)
+nrecords = len(records)
+
+simcount = 0
+simsum = 0
+smatrix = [[None] * nrecords for _ in range(nrecords)]
+for i, r1 in enumerate(records):
+    for j, r2 in enumerate(records):
+        if i == j:
+            smatrix[i][j] = 1
+            continue
+        simcount += 1
+        s = tiles.sim(r1.tiles, r2.tiles)
+        simsum += s
+        smatrix[i][j] = s
+simavg = simsum / simcount
+threshold = simavg + (1 - simavg) * disc
+
+clusters = []
+placed = set()
+for i, r1 in enumerate(records):
+    if i in placed:
+        continue
+    cur_cluster = [i]
+    placed |= {i}
+    for j in range(i + 1, nrecords):
+        if j in placed:
+            continue
+        r2 = records[j]
+        if smatrix[i][j] >= threshold:
+            cur_cluster.append(j)
+            placed |= {j}
+    clusters.append(cur_cluster)
+
+for c in clusters:
+    r0 = records[c[0]]
+    print(r0.cid, r0.title)
+    for cx in c[1:]:
+        r = records[cx]
+        print("    ", r.cid, r.title)
+
