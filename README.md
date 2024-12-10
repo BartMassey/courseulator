@@ -5,8 +5,8 @@ This quick Python script tries to figure out the latest
 offering of each of our PSU CS 410 "TOPIC" courses. The
 input is an Excel spreadsheet.
 
-Right now this is quite janky and barely works. Already
-useful, though.
+The basic approach is to try to group similar-looking course
+titles in date-sorted order, and produce reports from there.
 
 See `tiles.py` for a string-similarity measurement that has
 been tuned for the use case.
