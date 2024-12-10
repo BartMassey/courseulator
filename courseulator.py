@@ -3,7 +3,7 @@
 # generating student-emails.txt and "new format" students.csv.
 # Bart Massey 2021
 
-import argparse, csv, sys, warnings
+import argparse, datetime, csv, sys, warnings
 from collections import namedtuple
 
 from openpyxl import load_workbook
@@ -11,12 +11,15 @@ from openpyxl import load_workbook
 import tiles
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-d", "--disc", type=float, default=0.7)
+ap.add_argument("-d", "--disc", type=float, default=0.8)
+ap.add_argument("-y", "--years", type=int, default=10)
 ap.add_argument("sheet")
 args = ap.parse_args()
 
 sheet = args.sheet
 disc = args.disc
+years = args.years
+cur_year = datetime.date.today().year
 
 Record = namedtuple(
     'Record',
@@ -127,7 +130,9 @@ firsts = []
 latests = []
 for c in clusters:
     firsts.append(records[c[0]])
-    latests.append(records[c[-1]])
+    r = records[c[-1]]
+    if r.year < cur_year and r.year + years > cur_year:
+        latests.append(r)
 latests.sort(key = lambda r: (r.year, r.term), reverse = True)
 
 def write_csv(fn, rs):
